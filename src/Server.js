@@ -19,8 +19,8 @@ mongoose
   .then(() => console.log("Connected to mongoDB"))
   .catch((err) => console.error("Failed to connect to MongoDB :", err));
 
-app.use('/api/orders', orderRoutes);
-app.use('/api/cart', orderRoutes);
+app.use('/orders', orderRoutes);
+app.use('/cart', orderRoutes);
 
 
 if (process.env.NODE_ENV !== "test") {
