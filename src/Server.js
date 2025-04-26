@@ -1,14 +1,20 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-// const orderRoutes = require('./routes/orderRoutes');
+const cartRoutes = require('./routes/CartRoutes');
+const orderRoutes = require('./routes/OrderRoutes');
 require("dotenv").config();
 
 const app = express();
 
 const port = process.env.PORT || 3001;
 
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:5173', 
+  methods: ['GET', 'POST', 'DELETE', 'PATCH'],
+  credentials: true, 
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
 
 mongoose
@@ -19,7 +25,9 @@ mongoose
   .then(() => console.log("Connected to mongoDB"))
   .catch((err) => console.error("Failed to connect to MongoDB :", err));
 
-// app.use('/api/orders', orderRoutes);
+app.use('/', orderRoutes);
+app.use('/cart', cartRoutes);
+
 
 if (process.env.NODE_ENV !== "test") {
   app.listen(port, () => {

@@ -1,7 +1,7 @@
-// models/OrderModel.js
+// models/Cart.js
 const mongoose = require('mongoose');
 
-const OrderItemSchema = new mongoose.Schema({
+const CartItemSchema = new mongoose.Schema({
   id: { type: String, required: true },
   name: { type: String, required: true },
   price: { type: Number, required: true },
@@ -13,58 +13,27 @@ const OrderItemSchema = new mongoose.Schema({
   image: { type: String }
 });
 
-const OrderSchema = new mongoose.Schema({
+const CartSchema = new mongoose.Schema({
   userId: { type: String, required: true },
-  restaurantId: { type: String, required: true },
-  restaurantName: { type: String, required: true },
-  items: [OrderItemSchema],
+  restaurantId: { type: String },
+  restaurantName: { type: String },
+  items: [CartItemSchema],
   subtotal: { type: Number, default: 0 },
   tax: { type: Number, default: 0 },
   deliveryFee: { type: Number, default: 0 },
   total: { type: Number, default: 0 },
-  status: {
-    type: String,
-    enum: ['pending', 'confirmed', 'preparing', 'out_for_delivery', 'delivered', 'cancelled'],
-    default: 'pending'
-  },
-  paymentMethod: {
-    type: String,
-    enum: ['credit_card', 'debit_card', 'cash', 'wallet'],
-    required: true
-  },
-  paymentStatus: {
-    type: String,
-    enum: ['pending', 'paid', 'failed', 'refunded'],
-    default: 'pending'
-  },
-  deliveryAddress: {
-    street: String,
-    city: String,
-    state: String,
-    zipCode: String,
-    instructions: String
-  },
-  deliveryTime: {
-    type: Date
-  },
-  customerPhone: {
-    type: String
-  },
-  customerEmail: {
-    type: String
-  },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now }
 });
 
 // Pre-save middleware to update the 'updatedAt' field on save
-OrderSchema.pre('save', function(next) {
+CartSchema.pre('save', function(next) {
   this.updatedAt = Date.now();
   next();
 });
 
-// Method to calculate order totals (matching your cart calculation)
-OrderSchema.methods.calculateTotals = function() {
+// Method to calculate totals
+CartSchema.methods.calculateTotals = function() {
   // Calculate subtotal
   this.subtotal = this.items.reduce((total, item) => {
     let itemPrice = item.price;
@@ -94,6 +63,4 @@ OrderSchema.methods.calculateTotals = function() {
   return this;
 };
 
-const Order = mongoose.model('Order', OrderSchema);
-
-module.exports = Order;
+module.exports = mongoose.model('Cart', CartSchema);
