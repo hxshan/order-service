@@ -1,7 +1,8 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require("cors");
-const orderRoutes = require('./routes/CartRoutes');
+const cartRoutes = require('./routes/CartRoutes');
+const orderRoutes = require('./routes/OrderRoutes');
 require("dotenv").config();
 
 const app = express();
@@ -24,8 +25,8 @@ mongoose
   .then(() => console.log("Connected to mongoDB"))
   .catch((err) => console.error("Failed to connect to MongoDB :", err));
 
-app.use('/orders', orderRoutes);
-app.use('/cart', orderRoutes);
+app.use('/', orderRoutes);
+app.use('/cart', cartRoutes);
 
 
 if (process.env.NODE_ENV !== "test") {

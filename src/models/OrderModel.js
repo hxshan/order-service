@@ -1,34 +1,41 @@
-const mongoose = require("mongoose");
-const orderItemSchema = require("./OrderItem"); 
+// models/OrderModel.js
+const mongoose = require('mongoose');
 
-const orderSchema = new mongoose.Schema({
-  userId: {
-    type: String, 
-    required: true
-  },
-  restaurantId: {
-    type: String,
-    required: true
-  },
-  items: [orderItemSchema],
+const OrderItemSchema = new mongoose.Schema({
+  id: { type: String, required: true },
+  name: { type: String, required: true },
+  price: { type: Number, required: true },
+  quantity: { type: Number, required: true, default: 1 },
+  size: { type: String },
+  sizePrice: { type: Number, default: 0 },
+  addOns: [{ type: String }],
+  addOnsPrices: [{ type: Number }],
+  image: { type: String }
+});
+
+const OrderSchema = new mongoose.Schema({
+  userId: { type: String, required: true },
+  restaurantId: { type: String, required: true },
+  restaurantName: { type: String, required: true },
+  items: [OrderItemSchema],
+  subtotal: { type: Number, default: 0 },
+  tax: { type: Number, default: 0 },
+  deliveryFee: { type: Number, default: 0 },
+  total: { type: Number, default: 0 },
   status: {
     type: String,
     enum: ['pending', 'confirmed', 'preparing', 'out_for_delivery', 'delivered', 'cancelled'],
     default: 'pending'
   },
-  totalAmount: {
-    type: Number,
+  paymentMethod: {
+    type: String,
+    enum: ['credit_card', 'debit_card', 'cash', 'wallet'],
     required: true
   },
   paymentStatus: {
     type: String,
-    enum: ['pending', 'completed', 'failed', 'refunded'],
+    enum: ['pending', 'paid', 'failed', 'refunded'],
     default: 'pending'
-  },
-  paymentMethod: {
-    type: String,
-    enum: ['credit_card', 'cash'],
-    required: true
   },
   deliveryAddress: {
     street: String,
@@ -37,36 +44,56 @@ const orderSchema = new mongoose.Schema({
     zipCode: String,
     instructions: String
   },
-  deliveryFee: {
-    type: Number,
-    default: 0
-  },
-  estimatedDeliveryTime: {
+  deliveryTime: {
     type: Date
   },
-  actualDeliveryTime: {
-    type: Date
-  },
-  specialInstructions: {
+  customerPhone: {
     type: String
-  }
-}, { timestamps: true });
+  },
+  customerEmail: {
+    type: String
+  },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+});
 
+// Pre-save middleware to update the 'updatedAt' field on save
+OrderSchema.pre('save', function(next) {
+  this.updatedAt = Date.now();
+  next();
+});
 
-// orderSchema.methods.calculateTotal = function() {
-//   let total = 0;
-//   this.items.forEach(item => {
-//     total += item.price * item.quantity;
-//   });
-//   return total + this.deliveryFee;
-// };
+// Method to calculate order totals (matching your cart calculation)
+OrderSchema.methods.calculateTotals = function() {
+  // Calculate subtotal
+  this.subtotal = this.items.reduce((total, item) => {
+    let itemPrice = item.price;
+    
+    // Add size price
+    if (item.sizePrice) {
+      itemPrice += item.sizePrice;
+    }
+    
+    // Add addOns prices
+    if (item.addOnsPrices && item.addOnsPrices.length) {
+      itemPrice += item.addOnsPrices.reduce((sum, price) => sum + price, 0);
+    }
+    
+    return total + (itemPrice * item.quantity);
+  }, 0);
+  
+  // Calculate tax (10%)
+  this.tax = Math.round(this.subtotal * 0.1);
+  
+  // Calculate delivery fee
+  this.deliveryFee = this.subtotal > 0 ? 150 : 0;
+  
+  // Calculate total
+  this.total = this.subtotal + this.tax + this.deliveryFee;
+  
+  return this;
+};
 
+const Order = mongoose.model('Order', OrderSchema);
 
-// orderSchema.pre('save', async function(next) {
-//   if (this.isModified('items') || this.isModified('deliveryFee') || this.isNew) {
-//     this.totalAmount = this.calculateTotal();
-//   }
-//   next();
-// });
-
-module.exports =  mongoose.model("Order",  orderSchema);
+module.exports = Order;

@@ -2,7 +2,7 @@
 const Cart = require('../models/CartModel');
 
 // Hardcoded values for development
-const HARDCODED_USER_ID = "user123";
+const HARDCODED_USER_ID = "user13";
 const DEFAULT_RESTAURANT_ID = "rest456";
 const DEFAULT_RESTAURANT_NAME = "Default Restaurant";
 
