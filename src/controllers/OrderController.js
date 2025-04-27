@@ -3,14 +3,15 @@ const Order = require('../models/OrderModel');
 const Cart = require('../models/CartModel');
 
 // Hardcoded values for development
-const HARDCODED_USER_ID = "user123";
+const HARDCODED_USER_ID = "user13";
 
 const orderController = {
   // Create a new order from cart
   createOrder: async (req, res) => {
     try {
       const userId = HARDCODED_USER_ID;
-      const { 
+
+      const data =  { 
         paymentMethod, 
         deliveryAddress, 
         customerPhone, 
@@ -143,7 +144,7 @@ const orderController = {
       // Find the specific order
       const order = await Order.findOne({
         _id: orderId,
-        userId // Ensure user can only access their own orders
+        userId 
       });
       
       if (!order) {
