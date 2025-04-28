@@ -3,20 +3,23 @@ const Order = require('../models/OrderModel');
 const Cart = require('../models/CartModel');
 
 // Hardcoded values for development
-const HARDCODED_USER_ID = "user123";
+const HARDCODED_USER_ID = "user13";
 
 const orderController = {
   // Create a new order from cart
   createOrder: async (req, res) => {
     try {
       const userId = HARDCODED_USER_ID;
-      const { 
+
+      const data =  { 
         paymentMethod, 
         deliveryAddress, 
         customerPhone, 
         customerEmail,
         deliveryTime 
       } = req.body;
+
+      console.log(data)
       
       // Validate required fields
       if (!paymentMethod || !deliveryAddress) {
@@ -143,7 +146,7 @@ const orderController = {
       // Find the specific order
       const order = await Order.findOne({
         _id: orderId,
-        userId // Ensure user can only access their own orders
+        userId 
       });
       
       if (!order) {
@@ -252,7 +255,7 @@ const orderController = {
       }
       
       // Validate status
-      const validStatuses = ['pending', 'confirmed', 'preparing', 'out_for_delivery', 'delivered', 'cancelled'];
+      const validStatuses = ['pending', 'confirmed', 'preparing', 'ready_for_delivery', 'out_for_delivery', 'delivered', 'cancelled', 'rejected'];
       if (!validStatuses.includes(status)) {
         return res.status(400).json({
           success: false,
@@ -310,21 +313,17 @@ const orderController = {
         });
       }
       
-      // Pagination parameters
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 10;
       const skip = (page - 1) * limit;
       
-      // Filter parameters
-      const status = req.query.status; // Optional status filter
+      const status = req.query.status; 
       
-      // Build query
       const query = { restaurantId };
       if (status) {
         query.status = status;
       }
       
-      // Find orders for this restaurant with pagination
       const orders = await Order.find(query)
         .sort({ createdAt: -1 }) // Latest first
         .skip(skip)
