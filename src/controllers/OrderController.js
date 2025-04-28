@@ -255,7 +255,7 @@ const orderController = {
       }
       
       // Validate status
-      const validStatuses = ['pending', 'confirmed', 'preparing', 'out_for_delivery', 'delivered', 'cancelled'];
+      const validStatuses = ['pending', 'confirmed', 'preparing', 'out_for_delivery', 'delivered', 'cancelled', 'rejected'];
       if (!validStatuses.includes(status)) {
         return res.status(400).json({
           success: false,
@@ -313,21 +313,17 @@ const orderController = {
         });
       }
       
-      // Pagination parameters
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 10;
       const skip = (page - 1) * limit;
       
-      // Filter parameters
-      const status = req.query.status; // Optional status filter
+      const status = req.query.status; 
       
-      // Build query
       const query = { restaurantId };
       if (status) {
         query.status = status;
       }
       
-      // Find orders for this restaurant with pagination
       const orders = await Order.find(query)
         .sort({ createdAt: -1 }) // Latest first
         .skip(skip)
