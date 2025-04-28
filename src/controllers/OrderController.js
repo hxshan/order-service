@@ -18,6 +18,8 @@ const orderController = {
         customerEmail,
         deliveryTime 
       } = req.body;
+
+      console.log(data)
       
       // Validate required fields
       if (!paymentMethod || !deliveryAddress) {
