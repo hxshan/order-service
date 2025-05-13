@@ -2,14 +2,14 @@
 const Order = require("../models/OrderModel");
 const Cart = require("../models/CartModel");
 
-// Hardcoded values for development
-const HARDCODED_USER_ID = "f10b2515-73a4-4de4-acae-79c598d2cf44";
 
 const orderController = {
   // Create a new order from cart
   createOrder: async (req, res) => {
     try {
       const userId = req.user.userId;
+      const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
+
 
       if (!userId) {
         return res
